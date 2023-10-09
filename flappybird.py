@@ -21,7 +21,10 @@ class Bird(pygame.sprite.Sprite):
         self.flap_frame += 0.1
         if(self.flap_frame >= len(self.bird_flap)): self.flap_frame = 0
         self.image = self.bird_flap[int(self.flap_frame)]
-        self.image = pygame.transform.rotozoom(self.image, 0, 1.2)
+        #scale
+        self.image = pygame.transform.rotozoom(self.image, 0, 1.4)
+        #rotate
+        self.image = pygame.transform.rotate(self.image, self.gravity * -1.5)
 
     def apply_gravity(self):
         self.gravity += 1
