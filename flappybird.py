@@ -1,5 +1,5 @@
 import pygame
-from random import choice
+from random import choice, randint
 
 class Bird(pygame.sprite.Sprite):
     def __init__(self):
@@ -15,7 +15,7 @@ class Bird(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center = (150, 400))
 
     def jump(self):
-        self.gravity = -17
+        self.gravity = -16
 
     def animation_state(self):
         self.flap_frame += 0.1
@@ -34,9 +34,28 @@ class Bird(pygame.sprite.Sprite):
         self.animation_state()
         self.apply_gravity()
 
+class Pipe(pygame.sprite.Sprite):
+    def __init__(self, x, y, pos):
+        super().__init__()
+        self.pipe_gap = 270
+        self.image = pygame.image.load("Background/pipe.png").convert_alpha()
+        self.rect = self.image.get_rect()
+        #pos 1 is top pipe, pos -1 is bottom pipe
+        if pos == 1:
+            self.image = pygame.transform.flip(self.image, False, True)
+            self.rect.bottomleft = [x, y - int(self.pipe_gap/2)]
+        if pos == -1:
+            self.rect.topleft = [x, y + int(self.pipe_gap/2)]
+
+    def update(self):
+        self.image = pygame.transform.scale(self.image, (60, 400))
+        self.rect.x -= scroll_speed
+
 def background_scroll(scrollVal):
     for i in range(0, bg_tiles):
         screen.blit(bg_night, (bg_night.get_width()*i + scrollVal, 0))
+
+def base_scroll(scrollVal):
     for j in range(0, base_tiles):
         screen.blit(base, (base.get_width() * j + scrollVal, 640))
 
@@ -45,13 +64,12 @@ def game_start():
     screen.blit(start_screen, start_rect)
 
 def game_over():
-    background_scroll(scroll)
     screen.blit(game_over_screen, game_over_rect)
 
 def collisions():
     if bird.sprite.rect.y <= 0:
         bird.sprite.rect.y = 0
-    if bird.sprite.rect.y >= 630:
+    if bird.sprite.rect.bottom >= 640:
         bird.sprite.rect.y = 400
         bird.sprite.gravity = 0
         return False
@@ -78,6 +96,8 @@ start_time = 0
 bird = pygame.sprite.GroupSingle()
 bird.add(Bird())
 
+pipe_group = pygame.sprite.Group()
+
 #Font
 flappy_font = pygame.font.Font("Font/FlappyFont.ttf", 50)
 
@@ -100,11 +120,14 @@ game_over_screen = pygame.image.load("Background/gameover.png").convert_alpha()
 game_over_rect = game_over_screen.get_rect(center = (350, 200))
 
 run = True
-game_active = False
-scroll = 0
+game_active, flying = False, False
+scroll, scroll_speed = 0, 3
+
+last_pipe = pygame.time.get_ticks()
 
 while run:
     clock.tick(60)
+    current_time = pygame.time.get_ticks()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -112,23 +135,40 @@ while run:
         if game_active:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 bird.sprite.jump()
-        else:
+        else:   
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 bird.sprite.jump()
-                game_active = True
+                game_active, flying = True, True
 
-    if game_active:
-        #Background 
-        background_scroll(scroll)
-        scroll -= 3
+    if game_active and flying:
+
+        scroll -= scroll_speed
         if abs(scroll) > bg_night.get_width(): scroll = 0
 
-        #Score
-        score = display_score()
+        #Background 
+        background_scroll(scroll)
+
+        #Pipes
+        pipe_group.draw(screen)
+        pipe_group.update()
+        pipe_y_pos = randint(120,400)
+        if current_time - last_pipe >= 2000:
+            top_pipe = Pipe(SCREEN_WIDTH, pipe_y_pos, 1)
+            bottom_pipe = Pipe(SCREEN_WIDTH, pipe_y_pos, -1)
+            pipe_group.add(top_pipe)
+            pipe_group.add(bottom_pipe)
+            last_pipe = current_time
+            
+
+        #Base
+        base_scroll(scroll)
 
         #Bird
         bird.draw(screen)
         bird.update()
+
+        #Score
+        score = display_score()
 
         #Running condition
         game_active = collisions()
@@ -136,12 +176,9 @@ while run:
     else:
         if score == 0:
             game_start()
-            scroll -= 3
-            if abs(scroll) > bg_night.get_width(): scroll = 0
         else:
+            flying = False
             game_over()
             start_time = int(pygame.time.get_ticks()/1000)
-            scroll -= 3
-            if abs(scroll) > bg_night.get_width(): scroll = 0
 
     pygame.display.update()
