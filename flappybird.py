@@ -65,13 +65,20 @@ def game_start():
 
 def game_over():
     screen.blit(game_over_screen, game_over_rect)
+    screen.blit(restart_button, restart_rect)
 
 def collisions():
     if bird.sprite.rect.y <= 0:
         bird.sprite.rect.y = 0
+    if pygame.sprite.spritecollide(bird.sprite, pipe_group, False):
+        bird.sprite.rect.y = 400
+        bird.sprite.gravity = 0
+        pipe_group.empty()
+        return False
     if bird.sprite.rect.bottom >= 640:
         bird.sprite.rect.y = 400
         bird.sprite.gravity = 0
+        pipe_group.empty()
         return False
     return True
 
@@ -118,6 +125,9 @@ start_rect = start_screen.get_rect(center = (350, 300))
 #Game over screen
 game_over_screen = pygame.image.load("Background/gameover.png").convert_alpha()
 game_over_rect = game_over_screen.get_rect(center = (350, 200))
+restart_button = pygame.image.load("restart-button.png").convert_alpha()
+restart_button = pygame.transform.scale(restart_button, (74,74))
+restart_rect = restart_button.get_rect(center = (350,500))
 
 run = True
 game_active, flying = False, False
@@ -136,9 +146,10 @@ while run:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 bird.sprite.jump()
         else:   
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                bird.sprite.jump()
-                game_active, flying = True, True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                if restart_rect.collidepoint(pos): 
+                    game_active = True
 
     if game_active and flying:
 
