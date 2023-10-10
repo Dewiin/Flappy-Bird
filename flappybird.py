@@ -1,5 +1,5 @@
 import pygame
-from random import choice, randint
+from random import randint
 
 class Bird(pygame.sprite.Sprite):
     def __init__(self):
@@ -164,9 +164,9 @@ while run:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 bird.sprite.jump()
         else:   
-            if died and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            if died and event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 died = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+            elif not died and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 score = 0
                 bird.sprite.jump()
                 game_active, flying = True, True
