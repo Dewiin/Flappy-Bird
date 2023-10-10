@@ -25,7 +25,7 @@ class Bird(pygame.sprite.Sprite):
         #scale
         self.image = pygame.transform.rotozoom(self.image, 0, 1.3)
         #rotate
-        self.image = pygame.transform.rotate(self.image, self.gravity * -1.5)
+        self.image = pygame.transform.rotate(self.image, self.gravity * -1.2)
 
     def apply_gravity(self):
         self.gravity += 1
@@ -47,10 +47,8 @@ class Pipe(pygame.sprite.Sprite):
             self.rect.bottomleft = [x, y - int(self.pipe_gap/2)]
         if pos == -1:
             self.rect.topleft = [x, y + int(self.pipe_gap/2)]
-        
 
     def update(self):
-        #self.image = pygame.transform.scale(self.image, (52, 450))
         self.rect.x -= scroll_speed
         if self.rect.x < -100: self.kill()
 
