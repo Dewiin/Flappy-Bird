@@ -16,7 +16,7 @@ class Bird(pygame.sprite.Sprite):
 
     def jump(self):
         flap.play()
-        self.gravity = -16
+        self.gravity = -15
 
     def animation_state(self):
         self.flap_frame += 0.1
@@ -38,7 +38,7 @@ class Bird(pygame.sprite.Sprite):
 class Pipe(pygame.sprite.Sprite):
     def __init__(self, x, y, pos):
         super().__init__()
-        self.pipe_gap = 270
+        self.pipe_gap = 180
         self.image = pygame.image.load("Background/pipe.png").convert_alpha()
         self.rect = self.image.get_rect()
         #pos 1 is top pipe, pos -1 is bottom pipe
@@ -47,9 +47,10 @@ class Pipe(pygame.sprite.Sprite):
             self.rect.bottomleft = [x, y - int(self.pipe_gap/2)]
         if pos == -1:
             self.rect.topleft = [x, y + int(self.pipe_gap/2)]
+        
 
     def update(self):
-        self.image = pygame.transform.scale(self.image, (60, 400))
+        #self.image = pygame.transform.scale(self.image, (52, 450))
         self.rect.x -= scroll_speed
         if self.rect.x < -100: self.kill()
 
@@ -97,7 +98,7 @@ def display_score():
     screen.blit(score_surface, score_rect)
 
 SCREEN_WIDTH = 700
-SCREEN_HEIGHT = 750
+SCREEN_HEIGHT = 700
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Flappy Bird")
@@ -139,6 +140,7 @@ point = pygame.mixer.Sound("Sound/point.wav")
 die = pygame.mixer.Sound("Sound/audio_die.wav")
 flap = pygame.mixer.Sound("Sound/wing.wav")
 hit = pygame.mixer.Sound("Sound/hit.wav")
+game_song = pygame.mixer.Sound("Sound/GameSong.mp3")
 
 #Variables
 run = True
@@ -147,6 +149,9 @@ scroll, scroll_speed = 0, 3
 pass_pipe = False
 
 last_pipe = pygame.time.get_ticks()
+
+game_song.play()
+game_song.set_volume(0.8)
 
 while run:
     clock.tick(60)
@@ -168,16 +173,15 @@ while run:
 
     if game_active and flying:
 
-        scroll -= scroll_speed
-        if abs(scroll) > bg_night.get_width(): scroll = 0
-
         #Background 
         background_scroll(scroll)
+        scroll -= scroll_speed
+        if abs(scroll) > bg_night.get_width(): scroll = 0
 
         #Pipes
         pipe_group.draw(screen)
         pipe_group.update()
-        pipe_y_pos = randint(120,400)
+        pipe_y_pos = randint(230,410)
         if current_time - last_pipe >= 2000:
             top_pipe = Pipe(SCREEN_WIDTH, pipe_y_pos, 1)
             bottom_pipe = Pipe(SCREEN_WIDTH, pipe_y_pos, -1)
@@ -197,13 +201,12 @@ while run:
             if bird.sprite.rect.left > pipe_group.sprites()[0].rect.left\
                 and bird.sprite.rect.right < pipe_group.sprites()[0].rect.right\
                 and pass_pipe == False:
-                point.play()
                 pass_pipe = True
+                point.play()
             if pass_pipe:
                 if bird.sprite.rect.left > pipe_group.sprites()[0].rect.right:
                     score += 1
                     pass_pipe = False
-
         display_score()
 
         #Running condition
