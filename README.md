@@ -1,7 +1,7 @@
 # Flappy-Bird
 A Flappy Bird Clone
 
-#Install
+# Install
 ```pip3 install pygame```
 
 # Build and Run
