@@ -1,9 +1,13 @@
 # Flappy-Bird
 A Flappy Bird Clone
 
-# How to Play
+#Install
+```pip3 install pygame```
+
+# Build and Run
 1) Clone the repository
-2) Run ```flappybird.py``` in the terminal with ```python3 flappybird.py```
+2) Run the exectuable:
+```python3 flappybird.py```
 
 # Controls
 - ```Space``` to jump
